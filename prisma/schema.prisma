@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String
+  email        String        @unique
+  name         String
+  showEmail    Boolean
+  showName     Boolean
+  profile      Profile?
+  userAuth     UserAuth?
+  userSettings UserSettings?
+  posts        Post[]
+  comments     Comment[]
+  reactions    Reaction[]
+}
+
+model UserAuth {
+  id       String @id @default(uuid())
+  email    String
+  password String
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+}
+
+model UserSettings {
+  id        String  @id @default(uuid())
+  showEmail Boolean
+  showName  Boolean
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  status String
+  photo  String
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  title        String
+  content      String
+  isLive       Boolean
+  author       User      @relation(fields: [authorId], references: [id])
+  authorId     String
+  comment      Comment[]
+  reactable    Reactable @relation(fields: [id, resourceType], references: [resourceId, resourceType])
+  resourceType String
+}
+
+model Comment {
+  id           String    @id @default(uuid())
+  content      String
+  isLive       Boolean
+  post         Post      @relation(fields: [postId], references: [id])
+  postId       String
+  author       User      @relation(fields: [authorId], references: [id])
+  authorId     String
+  reactable    Reactable @relation(fields: [id, resourceType], references: [resourceId, resourceType])
+  resourceType String
+}
+
+model Reactable {
+  resourceId   String
+  resourceType String
+
+  Comment  Comment[]
+  Post     Post[]
+  Reaction Reaction[]
+  @@id([resourceId, resourceType])
+}
+
+model Reaction {
+  id           String    @id @default(uuid())
+  type         String
+  reactable    Reactable @relation(fields: [resourceId, resourceType], references: [resourceId, resourceType])
+  resourceId   String
+  resourceType String
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String
+}

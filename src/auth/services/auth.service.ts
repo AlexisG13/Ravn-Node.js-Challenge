@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SignUpDto } from '../dtos/sign-up.dto';
@@ -13,12 +14,16 @@ import * as fs from 'fs/promises';
 import * as handlebars from 'handlebars';
 import { User } from '@prisma/client';
 import { Request } from 'express';
+import { SignInDto } from '../dtos/sign-in.dto';
+import { AccessTokenDto } from '../dtos/access-token.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
   async signUp(signUpDto: SignUpDto, req: Request): Promise<void> {
@@ -47,6 +52,7 @@ export class AuthService {
             email,
             password: hashedPassword,
             isVerified: false,
+            username,
           },
         },
       },
@@ -94,12 +100,36 @@ export class AuthService {
   }
 
   async verifyAccount(userId: string) {
-    const updatedAccount = this.prisma.userAuth.update({
+    const updatedAccount = await this.prisma.userAuth.update({
       data: { isVerified: true },
       where: { userId },
     });
     if (!updatedAccount) {
       throw new NotFoundException('User does not exist');
     }
+  }
+
+  async signIn(signInDto: SignInDto): Promise<AccessTokenDto> {
+    const { email, password, username } = signInDto;
+    const signInOption = email ? { email } : { username };
+    const userCredentials = await this.prisma.userAuth.findUnique({
+      where: signInOption,
+    });
+    if (
+      !userCredentials ||
+      !(await bcrypt.compare(password, userCredentials.password))
+    ) {
+      throw new UnauthorizedException('Wrong credentials');
+    }
+    if (!userCredentials.isVerified) {
+      throw new UnauthorizedException('Account is not verified');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userCredentials.userId },
+    });
+    const payload = { email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
   }
 }

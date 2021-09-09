@@ -128,8 +128,13 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userCredentials.userId },
     });
-    const payload = { email: user.email };
+    const payload = { username: user.username };
     const accessToken = this.jwtService.sign(payload);
     return { accessToken };
+  }
+
+  async signOut(req: Request) {
+    const token = req.headers.authorization.split(' ')[1];
+    await this.prisma.jwtBlackList.create({ data: { jwt: token } });
   }
 }

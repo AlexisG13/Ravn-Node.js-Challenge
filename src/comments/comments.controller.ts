@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Param,
   Post,
   Put,
@@ -12,6 +11,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reaction, User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { CommentsService } from './comments.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { PostCommentDto } from './dtos/post-comment.dto';
 import { ReactCommentDto } from './dtos/react-comment.dto';
 
@@ -19,12 +19,14 @@ import { ReactCommentDto } from './dtos/react-comment.dto';
 export class CommentsController {
   constructor(private commentsService: CommentsService) {}
 
+  @ApiBearerAuth()
   @Delete('/:commentId')
   @UseGuards(AuthGuard())
   deleteComment(@Param('commentId') commentId: string, @GetUser() user: User) {
     return this.commentsService.deleteComment(commentId, user.id);
   }
 
+  @ApiBearerAuth()
   @Post('/:commentId/reactions')
   @UseGuards(AuthGuard())
   reactToComment(
@@ -39,6 +41,7 @@ export class CommentsController {
     );
   }
 
+  @ApiBearerAuth()
   @Put('/:commentId')
   @UseGuards(AuthGuard())
   updateComment(

@@ -6,6 +6,7 @@ import { CommentsService } from 'src/comments/comments.service';
 import { PostsService } from 'src/posts/posts.service';
 import { AccountsService } from './accounts.service';
 import { UpdateSettingsDto } from './dtos/update-settings.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('accounts')
 export class AccountsController {
@@ -20,6 +21,7 @@ export class AccountsController {
     return this.accountsService.getUserInfo(userId);
   }
 
+  @ApiBearerAuth()
   @Put('/settings')
   @UseGuards(AuthGuard())
   updateSettings(

@@ -16,6 +16,7 @@ import { PostCommentDto } from 'src/comments/dtos/post-comment.dto';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { ReactPostDto } from './dtos/react-post.dto';
 import { PostsService } from './posts.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('posts')
 export class PostsController {
@@ -24,12 +25,14 @@ export class PostsController {
     private commentsService: CommentsService,
   ) {}
 
+  @ApiBearerAuth()
   @Get()
   @UseGuards(AuthGuard())
   getMyPosts(@GetUser() user: User): Promise<PostEntity[]> {
     return this.postService.getUserPosts(user.id);
   }
 
+  @ApiBearerAuth()
   @Get('/drafts')
   @UseGuards(AuthGuard())
   getMyDrafts(@GetUser() user: User): Promise<PostEntity[]> {
@@ -41,6 +44,7 @@ export class PostsController {
     return this.postService.getPost(postId);
   }
 
+  @ApiBearerAuth()
   @Get('/:postId/draft')
   @UseGuards(AuthGuard())
   getDraft(
@@ -50,6 +54,7 @@ export class PostsController {
     return this.postService.getDraft(postId, user.id);
   }
 
+  @ApiBearerAuth()
   @Post()
   @UseGuards(AuthGuard())
   createPost(
@@ -59,7 +64,9 @@ export class PostsController {
     return this.postService.createPost(createPostDto, user.id);
   }
 
+  @ApiBearerAuth()
   @Put('/:postId')
+  @UseGuards(AuthGuard())
   updatePost(
     @Param('postId') postId: string,
     @GetUser() user: User,
@@ -68,7 +75,9 @@ export class PostsController {
     return this.postService.updatePost(createPostDto, postId, user.id);
   }
 
+  @ApiBearerAuth()
   @Delete('/:postId')
+  @UseGuards(AuthGuard())
   deletePost(
     @Param('postId') postId: string,
     @GetUser() user: User,
@@ -76,6 +85,7 @@ export class PostsController {
     return this.deletePost(postId, user);
   }
 
+  @ApiBearerAuth()
   @Post('/:postId/reactions')
   @UseGuards(AuthGuard())
   reactToPost(
@@ -96,6 +106,7 @@ export class PostsController {
     return this.commentsService.getPostComments(postId);
   }
 
+  @ApiBearerAuth()
   @Post('/:postId/comments')
   @UseGuards(AuthGuard())
   postComment(

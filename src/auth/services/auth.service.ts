@@ -58,7 +58,7 @@ export class AuthService {
         profile: {
           create: {
             status: 'Hey there Im using microblog!',
-            photo: null,
+            photo: 'Default photo',
           },
         },
       },

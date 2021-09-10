@@ -14,4 +14,10 @@ export class AccountsController {
     private postService: PostsService,
     private commentsService: CommentsService,
   ) {}
+
+  @Get('/:userId')
+  getAccountInfo(@Param('userId') userId: string) {
+    return this.accountsService.getUserInfo(userId);
+  }
+
 }

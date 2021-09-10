@@ -85,4 +85,14 @@ export class PostsController {
   ): Promise<Reaction> {
     return this.reactToPost(postId, reactPostDto, user);
   }
+
+  @Get('/:postId/reactions')
+  getPostReactions(@Param('postId') postId: string): Promise<Reaction[]> {
+    return this.postService.getPostReactions(postId);
+  }
+
+  @Get('/:postId/comments')
+  getPostComments(@Param('postId') postId: string): Promise<Comment[]> {
+    return this.commentsService.getPostComments(postId);
+  }
 }

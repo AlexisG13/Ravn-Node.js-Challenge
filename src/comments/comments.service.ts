@@ -91,4 +91,19 @@ export class CommentsService {
       data: { content, isLive },
     });
   }
+
+  async reactToComment(
+    { reactionId }: ReactCommentDto,
+    userId: string,
+    commentId: string,
+  ): Promise<Reaction> {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+      include: { reactable: true },
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+    return this.reactionService.createReaction(comment, userId, reactionId);
+  }
 }

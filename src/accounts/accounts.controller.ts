@@ -29,4 +29,9 @@ export class AccountsController {
     return this.accountsService.updateSettings(user.id, updateSettingsDto);
   }
 
+  @Get('/:userId/posts')
+  getUserPosts(@Param('userId') userId: string): Promise<PostEntity[]> {
+    return this.postService.getUserPosts(userId);
+  }
+
 }

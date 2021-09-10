@@ -106,4 +106,14 @@ export class CommentsService {
     }
     return this.reactionService.createReaction(comment, userId, reactionId);
   }
+
+  async getUserComments(userId: string): Promise<Comment[]> {
+    const comments = await this.prisma.comment.findMany({
+      where: { authorId: userId },
+    });
+    if (comments.length === 0) {
+      throw new NotFoundException('User has no comments');
+    }
+    return comments;
+  }
 }

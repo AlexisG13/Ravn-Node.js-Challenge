@@ -10,5 +10,5 @@ export class CreatePostDto {
   content: string;
 
   @IsBoolean()
-  isDraft: boolean;
+  isLive: boolean;
 }

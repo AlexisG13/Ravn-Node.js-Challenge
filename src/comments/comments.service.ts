@@ -46,4 +46,17 @@ export class CommentsService {
     return newComment;
   }
 
+  async getPostComments(postId: string): Promise<Comment[]> {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    const comments = await this.prisma.comment.findMany({
+      where: { AND: [{ postId }, { isLive: true }] },
+    });
+    if (comments.length === 0) {
+      throw new NotFoundException('The post has no comments');
+    }
+    return comments;
+  }
 }

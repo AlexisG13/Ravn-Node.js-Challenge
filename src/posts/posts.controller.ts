@@ -95,4 +95,14 @@ export class PostsController {
   getPostComments(@Param('postId') postId: string): Promise<Comment[]> {
     return this.commentsService.getPostComments(postId);
   }
+
+  @Post('/:postId/comments')
+  @UseGuards(AuthGuard())
+  postComment(
+    @Param('postId') postId: string,
+    @GetUser() user: User,
+    @Body() postCommentDto: PostCommentDto,
+  ): Promise<Comment> {
+    return this.commentsService.postComment(postCommentDto, user.id, postId);
+  }
 }

@@ -68,4 +68,27 @@ export class CommentsService {
       throw new NotFoundException('The comment does not exist');
     }
   }
+
+  async updateComment(
+    { content, isLive }: PostCommentDto,
+    commentId: string,
+    userId: string,
+  ): Promise<Comment> {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+    if (comment.authorId !== userId) {
+      throw new NotFoundException('Comment not found');
+    }
+    if (comment.isLive === true && isLive === false) {
+      throw new ConflictException('The comment is already published');
+    }
+    return this.prisma.comment.update({
+      where: { id: comment.id },
+      data: { content, isLive },
+    });
+  }
 }

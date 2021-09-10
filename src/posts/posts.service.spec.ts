@@ -148,5 +148,35 @@ describe('PostsService', () => {
       );
     });
   });
+
+  describe('updatePost', () => {
+    it('should throw not found exception when the post does not exist', async () => {
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(null);
+      expect(
+        service.updatePost(updatePostDto, '789', '456'),
+      ).rejects.toThrowError(NotFoundException);
+    });
+
+    it('should throw not found exception when the user does not own the post', async () => {
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(mockSinglePost);
+      expect(
+        service.updatePost(updatePostDto, '789', '123'),
+      ).rejects.toThrowError(NotFoundException);
+    });
+
+    it('should throw conflict exception when the post is already live', async () => {
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(mockSinglePost);
+      expect(
+        service.updatePost(failUpdatePostDto, '789', '456'),
+      ).rejects.toThrowError(ConflictException);
+    });
+
+    it('should return an updated post', async () => {
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(mockSinglePost);
+      (prisma.post.update as jest.Mock).mockResolvedValue(mockUpdatedPost);
+      const result = await service.updatePost(updatePostDto, '789', '456');
+      expect(result).toEqual(mockUpdatedPost);
+    });
+  });
   });
 });

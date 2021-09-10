@@ -61,4 +61,25 @@ export class PostsService {
     });
     return post;
   }
+
+  async updatePost(
+    createPostDto: CreatePostDto,
+    postId: string,
+    userId: string,
+  ): Promise<Post> {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    if (post.authorId !== userId) {
+      throw new NotFoundException('Post not found');
+    }
+    if (post.isLive === true && createPostDto.isDraft === true) {
+      throw new ConflictException('The post is already published');
+    }
+    return this.prisma.post.update({
+      where: { id: post.id },
+      data: { ...createPostDto },
+    });
+  }
 }

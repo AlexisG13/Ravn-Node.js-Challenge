@@ -35,4 +35,9 @@ export class PostsController {
   getMyDrafts(@GetUser() user: User): Promise<PostEntity[]> {
     return this.postService.getUserPosts(user.id, { onlyLive: false });
   }
+
+  @Get('/:postId')
+  getPost(@Param('postId') postId: string): Promise<PostEntity> {
+    return this.postService.getPost(postId);
+  }
 }

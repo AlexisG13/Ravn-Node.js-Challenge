@@ -7,16 +7,15 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 model User {
   id           String        @id @default(uuid())
-  username     String
+  username     String        @unique
   email        String        @unique
   name         String
-  showEmail    Boolean
-  showName     Boolean
   profile      Profile?
   userAuth     UserAuth?
   userSettings UserSettings?
@@ -26,11 +25,13 @@ model User {
 }
 
 model UserAuth {
-  id       String @id @default(uuid())
-  email    String
-  password String
-  user     User   @relation(fields: [userId], references: [id])
-  userId   String
+  id         String  @id @default(uuid())
+  email      String  @unique
+  password   String
+  username   String  @unique
+  isVerified Boolean
+  user       User    @relation(fields: [userId], references: [id])
+  userId     String  @unique
 }
 
 model UserSettings {
@@ -38,7 +39,7 @@ model UserSettings {
   showEmail Boolean
   showName  Boolean
   user      User    @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String  @unique
 }
 
 model Role {
@@ -49,33 +50,33 @@ model Role {
 model Profile {
   id     String @id @default(uuid())
   user   User   @relation(fields: [userId], references: [id])
-  userId String
+  userId String @unique
   status String
   photo  String
 }
 
 model Post {
-  id           String    @id @default(uuid())
+  id           String     @id @default(uuid())
+  resourceType String     @default("1")
   title        String
   content      String
   isLive       Boolean
-  author       User      @relation(fields: [authorId], references: [id])
+  author       User       @relation(fields: [authorId], references: [id])
   authorId     String
   comment      Comment[]
-  reactable    Reactable @relation(fields: [id, resourceType], references: [resourceId, resourceType])
-  resourceType String
+  reactable    Reactable? @relation(fields: [id, resourceType], references: [resourceId, resourceType])
 }
 
 model Comment {
-  id           String    @id @default(uuid())
+  id           String     @id @default(uuid())
+  resourceType String     @default("2")
   content      String
   isLive       Boolean
-  post         Post      @relation(fields: [postId], references: [id])
+  post         Post       @relation(fields: [postId], references: [id])
   postId       String
-  author       User      @relation(fields: [authorId], references: [id])
+  author       User       @relation(fields: [authorId], references: [id])
   authorId     String
-  reactable    Reactable @relation(fields: [id, resourceType], references: [resourceId, resourceType])
-  resourceType String
+  reactable    Reactable? @relation(fields: [id, resourceType], references: [resourceId, resourceType])
 }
 
 model Reactable {
@@ -89,12 +90,24 @@ model Reactable {
 }
 
 model Reaction {
-  id           String    @id @default(uuid())
-  type         String
-  reactable    Reactable @relation(fields: [resourceId, resourceType], references: [resourceId, resourceType])
+  id           String            @id @default(uuid())
+  reactable    Reactable         @relation(fields: [resourceId, resourceType], references: [resourceId, resourceType])
   resourceId   String
+  reactionType ReactionReference @relation(fields: [resourceType], references: [id])
   resourceType String
+  User         User              @relation(fields: [userId], references: [id])
+  userId       String
 
-  User   User   @relation(fields: [userId], references: [id])
-  userId String
+  @@unique([resourceId, userId])
+}
+
+model ReactionReference {
+  id       String     @id @default(uuid())
+  name     String
+  Reaction Reaction[]
+}
+
+model JwtBlackList {
+  id  String @id @default(uuid())
+  jwt String
 }

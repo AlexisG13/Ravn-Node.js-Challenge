@@ -37,4 +37,28 @@ export class PostsService {
     });
     if (deletedPost.count === 0) throw new NotFoundException('Post not found');
   }
+
+  async createPost(
+    { title, content, isDraft }: CreatePostDto,
+    userId: string,
+  ): Promise<Post> {
+    const post = await this.prisma.$transaction(async (prisma) => {
+      const newPost = await prisma.post.create({
+        data: {
+          title,
+          content,
+          isLive: isDraft,
+          author: { connect: { id: userId } },
+        },
+      });
+      await prisma.reactable.create({
+        data: {
+          resourceId: newPost.id,
+          resourceType: newPost.resourceType,
+        },
+      });
+      return newPost;
+    });
+    return post;
+  }
 }

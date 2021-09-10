@@ -103,7 +103,7 @@ model Reaction {
 
 model ReactionReference {
   id       String     @id @default(uuid())
-  name     String
+  name     String     @unique
   Reaction Reaction[]
 }
 

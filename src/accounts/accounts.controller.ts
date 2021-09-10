@@ -20,4 +20,13 @@ export class AccountsController {
     return this.accountsService.getUserInfo(userId);
   }
 
+  @Put('/settings')
+  @UseGuards(AuthGuard())
+  updateSettings(
+    @GetUser() user: User,
+    @Body() updateSettingsDto: UpdateSettingsDto,
+  ) {
+    return this.accountsService.updateSettings(user.id, updateSettingsDto);
+  }
+
 }

@@ -40,4 +40,14 @@ export class PostsController {
   getPost(@Param('postId') postId: string): Promise<PostEntity> {
     return this.postService.getPost(postId);
   }
+
+  @Get('/:postId/draft')
+  @UseGuards(AuthGuard())
+  getDraft(
+    @Param('postId') postId: string,
+    @GetUser() user: User,
+  ): Promise<PostEntity> {
+    return this.postService.getDraft(postId, user.id);
+  }
+
 }

@@ -178,5 +178,38 @@ describe('PostsService', () => {
       expect(result).toEqual(mockUpdatedPost);
     });
   });
+  describe('reactToPost', () => {
+    it('should throw bad request exception when the reaction does not exist', () => {
+      (prisma.reactionReference.findUnique as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+      expect(
+        service.reactToPost({ reactionId: '1' }, '123', '789'),
+      ).rejects.toThrowError(BadRequestException);
+    });
+
+    it('should throw not found exception when the post does not exist', () => {
+      (prisma.reactionReference.findUnique as jest.Mock).mockResolvedValue(
+        mockReactionReference,
+      );
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(undefined);
+      expect(
+        service.reactToPost({ reactionId: '1' }, '123', '789'),
+      ).rejects.toThrowError(NotFoundException);
+    });
+
+    it('should create a new reaction by the given user on the post', async () => {
+      (prisma.reactionReference.findUnique as jest.Mock).mockResolvedValue(
+        mockReactionReference,
+      );
+      (prisma.post.findUnique as jest.Mock).mockResolvedValue(mockSinglePost);
+      (prisma.reaction.create as jest.Mock).mockResolvedValue(mockReaction);
+      const result = await service.reactToPost(
+        { reactionId: '1' },
+        '123',
+        '789',
+      );
+      expect(result).toEqual(mockReaction);
+    });
   });
 });

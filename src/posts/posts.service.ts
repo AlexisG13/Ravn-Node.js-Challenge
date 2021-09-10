@@ -82,4 +82,38 @@ export class PostsService {
       data: { ...createPostDto },
     });
   }
+
+  async reactToPost(
+    { reactionId }: ReactPostDto,
+    userId: string,
+    postId: string,
+  ) {
+    const reaction = await this.prisma.reactionReference.findUnique({
+      where: { id: reactionId },
+    });
+    if (!reaction) {
+      throw new BadRequestException('Invalid reaction');
+    }
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+      include: { reactable: true },
+    });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    return this.prisma.reaction.create({
+      data: {
+        reactable: {
+          connect: {
+            resourceId_resourceType: {
+              resourceId: post.reactable.resourceId,
+              resourceType: post.reactable.resourceType,
+            },
+          },
+        },
+        User: { connect: { id: userId } },
+        reactionType: { connect: { id: reactionId } },
+      },
+    });
+  }
 }

@@ -34,4 +34,11 @@ export class AccountsService {
     });
   }
 
+  async getProfile(userId: string): Promise<Profile> {
+    const profile = await this.prisma.profile.findUnique({ where: { userId } });
+    if (!profile) {
+      throw new NotFoundException('User does not exist');
+    }
+    return profile;
+  }
 }

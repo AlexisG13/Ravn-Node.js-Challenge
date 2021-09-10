@@ -116,5 +116,20 @@ describe('PostsService', () => {
       expect(service.getPost('456')).rejects.toThrowError(NotFoundException);
     });
   });
+
+  describe('getUserPosts', () => {
+    it('should get all posts from an user', async () => {
+      (prisma.post.findMany as jest.Mock).mockResolvedValue(mockFindMany);
+      const result = await service.getUserPosts('789');
+      expect(result).toEqual(mockFindMany);
+    });
+
+    it('should throw not found exception if the user has no posts', () => {
+      (prisma.post.findMany as jest.Mock).mockResolvedValue([]);
+      expect(service.getUserPosts('000')).rejects.toThrowError(
+        NotFoundException,
+      );
+    });
+  });
   });
 });

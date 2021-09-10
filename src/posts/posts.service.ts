@@ -21,4 +21,13 @@ export class PostsService {
     return post;
   }
 
+  async getUserPosts(userId: string): Promise<Post[]> {
+    const usersPosts = await this.prisma.post.findMany({
+      where: { authorId: userId },
+    });
+    if (usersPosts.length === 0) {
+      throw new NotFoundException('User has no posts created');
+    }
+    return usersPosts;
+  }
 }

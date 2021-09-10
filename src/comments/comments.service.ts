@@ -59,4 +59,13 @@ export class CommentsService {
     }
     return comments;
   }
+
+  async deleteComment(commentId: string, userId: string): Promise<void> {
+    const queryResult = await this.prisma.comment.deleteMany({
+      where: { AND: [{ id: commentId }, { authorId: userId }] },
+    });
+    if (queryResult.count === 0) {
+      throw new NotFoundException('The comment does not exist');
+    }
+  }
 }

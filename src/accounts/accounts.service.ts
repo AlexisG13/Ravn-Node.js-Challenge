@@ -24,4 +24,14 @@ export class AccountsService {
     return user;
   }
 
+  async updateSettings(
+    userId: string,
+    updateSettingsDto: UpdateSettingsDto,
+  ): Promise<UserSettings> {
+    return this.prisma.userSettings.update({
+      where: { userId },
+      data: updateSettingsDto,
+    });
+  }
+
 }

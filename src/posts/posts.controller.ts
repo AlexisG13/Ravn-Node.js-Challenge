@@ -76,4 +76,13 @@ export class PostsController {
     return this.deletePost(postId, user);
   }
 
+  @Post('/:postId/reactions')
+  @UseGuards(AuthGuard())
+  reactToPost(
+    @Param('postId') postId: string,
+    @Body() reactPostDto: ReactPostDto,
+    @GetUser() user: User,
+  ): Promise<Reaction> {
+    return this.reactToPost(postId, reactPostDto, user);
+  }
 }

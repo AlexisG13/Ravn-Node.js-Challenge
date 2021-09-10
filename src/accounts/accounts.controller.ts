@@ -34,4 +34,9 @@ export class AccountsController {
     return this.postService.getUserPosts(userId);
   }
 
+  @Get('/:userId/comments')
+  getUserComments(@Param('userId') userId: string): Promise<Comment[]> {
+    return this.commentsService.getUserComments(userId);
+  }
+
 }

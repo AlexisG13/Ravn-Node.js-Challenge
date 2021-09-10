@@ -29,4 +29,17 @@ export class ReactionsService {
     });
   }
 
+  async getReaction(reactionId: string): Promise<ReactionReference> {
+    const reaction = await this.prisma.reactionReference.findUnique({
+      where: { id: reactionId },
+    });
+    if (!reaction) {
+      throw new NotFoundException('Reaction not found');
+    }
+    return reaction;
+  }
+
+  getReactions(): Promise<ReactionReference[]> {
+    return this.prisma.reactionReference.findMany();
+  }
 }

@@ -59,4 +59,12 @@ export class PostsController {
     return this.postService.createPost(createPostDto, user.id);
   }
 
+  @Put('/:postId')
+  updatePost(
+    @Param('postId') postId: string,
+    @GetUser() user: User,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostEntity> {
+    return this.postService.updatePost(createPostDto, postId, user.id);
+  }
 }

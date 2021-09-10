@@ -4,26 +4,44 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Post } from '@prisma/client';
+import { Post, Reaction } from '@prisma/client';
+import { ReactionsService } from '../reactions/reactions.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { ReactPostDto } from './dtos/react-post.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private reactionService: ReactionsService,
+  ) {}
 
-  async getPost(postId: string): Promise<Post> {
+  async getPost(postId: string, options = { onlyLive: true }): Promise<Post> {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    if (options.onlyLive === true && !post.isLive) {
       throw new NotFoundException('Post not found');
     }
     return post;
   }
 
-  async getUserPosts(userId: string): Promise<Post[]> {
+  async getDraft(postId: string, userId: string): Promise<Post> {
+    const post = await this.getPost(postId, { onlyLive: false });
+    if (post.authorId !== userId) {
+      throw new NotFoundException('Post not found');
+    }
+    return post;
+  }
+
+  async getUserPosts(
+    userId: string,
+    options = { onlyLive: true },
+  ): Promise<Post[]> {
     const usersPosts = await this.prisma.post.findMany({
-      where: { authorId: userId },
+      where: { AND: [{ authorId: userId }, { isLive: options.onlyLive }] },
     });
     if (usersPosts.length === 0) {
       throw new NotFoundException('User has no posts created');
@@ -39,7 +57,7 @@ export class PostsService {
   }
 
   async createPost(
-    { title, content, isDraft }: CreatePostDto,
+    { title, content, isLive: isDraft }: CreatePostDto,
     userId: string,
   ): Promise<Post> {
     const post = await this.prisma.$transaction(async (prisma) => {
@@ -67,14 +85,11 @@ export class PostsService {
     postId: string,
     userId: string,
   ): Promise<Post> {
-    const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
+    const post = await this.getPost(postId);
     if (post.authorId !== userId) {
       throw new NotFoundException('Post not found');
     }
-    if (post.isLive === true && createPostDto.isDraft === true) {
+    if (post.isLive === true && createPostDto.isLive === false) {
       throw new ConflictException('The post is already published');
     }
     return this.prisma.post.update({
@@ -87,13 +102,7 @@ export class PostsService {
     { reactionId }: ReactPostDto,
     userId: string,
     postId: string,
-  ) {
-    const reaction = await this.prisma.reactionReference.findUnique({
-      where: { id: reactionId },
-    });
-    if (!reaction) {
-      throw new BadRequestException('Invalid reaction');
-    }
+  ): Promise<Reaction> {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
       include: { reactable: true },
@@ -101,19 +110,17 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    return this.prisma.reaction.create({
-      data: {
-        reactable: {
-          connect: {
-            resourceId_resourceType: {
-              resourceId: post.reactable.resourceId,
-              resourceType: post.reactable.resourceType,
-            },
-          },
-        },
-        User: { connect: { id: userId } },
-        reactionType: { connect: { id: reactionId } },
-      },
+    return this.reactionService.createReaction(post, userId, reactionId);
+  }
+
+  async getPostReactions(postId: string) {
+    const post = await this.getPost(postId);
+    const reactions = await this.prisma.reaction.findMany({
+      where: { resourceId: post.id },
     });
+    if (reactions.length === 0) {
+      throw new NotFoundException('Post has no reactions');
+    }
+    return reactions;
   }
 }

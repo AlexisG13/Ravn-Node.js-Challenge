@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { SignUpDto } from '../dtos/sign-up.dto';
 import * as mailgun from 'mailgun-js';
 import * as bcrypt from 'bcrypt';
@@ -53,6 +53,12 @@ export class AuthService {
             password: hashedPassword,
             isVerified: false,
             username,
+          },
+        },
+        profile: {
+          create: {
+            status: 'Hey there Im using microblog!',
+            photo: null,
           },
         },
       },

@@ -50,4 +50,13 @@ export class PostsController {
     return this.postService.getDraft(postId, user.id);
   }
 
+  @Post()
+  @UseGuards(AuthGuard())
+  createPost(
+    @Body() createPostDto: CreatePostDto,
+    @GetUser() user: User,
+  ): Promise<PostEntity> {
+    return this.postService.createPost(createPostDto, user.id);
+  }
+
 }

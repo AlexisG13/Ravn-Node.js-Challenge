@@ -38,4 +38,14 @@ export class CommentsController {
       commentId,
     );
   }
+
+  @Put('/:commentId')
+  @UseGuards(AuthGuard())
+  updateComment(
+    @Param('commentId') commentId: string,
+    @GetUser() user: User,
+    @Body() postCommentDto: PostCommentDto,
+  ): Promise<Comment> {
+    return this.updateComment(commentId, user, postCommentDto);
+  }
 }

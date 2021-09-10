@@ -30,4 +30,11 @@ export class PostsService {
     }
     return usersPosts;
   }
+
+  async deletePost(userId: string, postId: string) {
+    const deletedPost = await this.prisma.post.deleteMany({
+      where: { AND: [{ id: postId }, { authorId: userId }] },
+    });
+    if (deletedPost.count === 0) throw new NotFoundException('Post not found');
+  }
 }

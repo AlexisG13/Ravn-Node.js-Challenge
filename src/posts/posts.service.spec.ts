@@ -117,6 +117,23 @@ describe('PostsService', () => {
     });
   });
 
+  describe('deletePost', () => {
+    it('should deletea a post', async () => {
+      (prisma.post.deleteMany as jest.Mock).mockResolvedValue(mockDeleteMany);
+      const result = await service.deletePost('456', '123');
+      expect(result).toEqual(undefined);
+    });
+
+    it('should throw not found exception when the post does not exist', async () => {
+      (prisma.post.deleteMany as jest.Mock).mockResolvedValue(
+        mockDeleteManyFail,
+      );
+      expect(service.deletePost('456', '789')).rejects.toThrowError(
+        NotFoundException,
+      );
+    });
+  });
+
   describe('getUserPosts', () => {
     it('should get all posts from an user', async () => {
       (prisma.post.findMany as jest.Mock).mockResolvedValue(mockFindMany);

@@ -67,4 +67,13 @@ export class PostsController {
   ): Promise<PostEntity> {
     return this.postService.updatePost(createPostDto, postId, user.id);
   }
+
+  @Delete('/:postId')
+  deletePost(
+    @Param('postId') postId: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.deletePost(postId, user);
+  }
+
 }

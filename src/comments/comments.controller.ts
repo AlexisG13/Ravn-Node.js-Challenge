@@ -25,4 +25,17 @@ export class CommentsController {
     return this.commentsService.deleteComment(commentId, user.id);
   }
 
+  @Post('/:commentId/reactions')
+  @UseGuards(AuthGuard())
+  reactToComment(
+    @Param('commentId') commentId: string,
+    @GetUser() user: User,
+    @Body() reactCommentDto: ReactCommentDto,
+  ): Promise<Reaction> {
+    return this.commentsService.reactToComment(
+      reactCommentDto,
+      user.id,
+      commentId,
+    );
+  }
 }

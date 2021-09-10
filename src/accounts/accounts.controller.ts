@@ -39,4 +39,8 @@ export class AccountsController {
     return this.commentsService.getUserComments(userId);
   }
 
+  @Get('/:userId/profile')
+  getUserProfile(@Param('userId') userId: string): Promise<Profile> {
+    return this.accountsService.getProfile(userId);
+  }
 }

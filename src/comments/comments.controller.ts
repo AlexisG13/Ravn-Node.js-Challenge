@@ -14,6 +14,7 @@ import { CommentsService } from './comments.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { PostCommentDto } from './dtos/post-comment.dto';
 import { ReactCommentDto } from './dtos/react-comment.dto';
+import { SignInGuard } from 'src/auth/guards/sign-in.guard';
 
 @Controller('comments')
 export class CommentsController {
@@ -21,14 +22,14 @@ export class CommentsController {
 
   @ApiBearerAuth()
   @Delete('/:commentId')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   deleteComment(@Param('commentId') commentId: string, @GetUser() user: User) {
     return this.commentsService.deleteComment(commentId, user.id);
   }
 
   @ApiBearerAuth()
   @Post('/:commentId/reactions')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   reactToComment(
     @Param('commentId') commentId: string,
     @GetUser() user: User,
@@ -43,7 +44,7 @@ export class CommentsController {
 
   @ApiBearerAuth()
   @Put('/:commentId')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   updateComment(
     @Param('commentId') commentId: string,
     @GetUser() user: User,

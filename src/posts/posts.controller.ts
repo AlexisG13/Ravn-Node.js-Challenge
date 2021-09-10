@@ -17,6 +17,7 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { ReactPostDto } from './dtos/react-post.dto';
 import { PostsService } from './posts.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { SignInGuard } from 'src/auth/guards/sign-in.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -27,14 +28,14 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Get()
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   getMyPosts(@GetUser() user: User): Promise<PostEntity[]> {
     return this.postService.getUserPosts(user.id);
   }
 
   @ApiBearerAuth()
   @Get('/drafts')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   getMyDrafts(@GetUser() user: User): Promise<PostEntity[]> {
     return this.postService.getUserPosts(user.id, { onlyLive: false });
   }
@@ -46,7 +47,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Get('/:postId/draft')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   getDraft(
     @Param('postId') postId: string,
     @GetUser() user: User,
@@ -56,7 +57,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Post()
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   createPost(
     @Body() createPostDto: CreatePostDto,
     @GetUser() user: User,
@@ -66,7 +67,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Put('/:postId')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   updatePost(
     @Param('postId') postId: string,
     @GetUser() user: User,
@@ -77,7 +78,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Delete('/:postId')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   deletePost(
     @Param('postId') postId: string,
     @GetUser() user: User,
@@ -87,7 +88,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Post('/:postId/reactions')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   reactToPost(
     @Param('postId') postId: string,
     @Body() reactPostDto: ReactPostDto,
@@ -108,7 +109,7 @@ export class PostsController {
 
   @ApiBearerAuth()
   @Post('/:postId/comments')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   postComment(
     @Param('postId') postId: string,
     @GetUser() user: User,

@@ -13,6 +13,7 @@ import { Request } from 'express';
 import { SignInDto } from './dtos/sign-in.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { SignInGuard } from './guards/sign-in.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -33,6 +34,7 @@ export class AuthController {
     return this.authService.signIn(signInDto);
   }
 
+  @ApiBearerAuth()
   @Get('sign-out')
   @UseGuards(AuthGuard(), SignInGuard)
   signOut(@Req() req: Request) {

@@ -7,6 +7,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { AccountsService } from './accounts.service';
 import { UpdateSettingsDto } from './dtos/update-settings.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { SignInGuard } from 'src/auth/guards/sign-in.guard';
 
 @Controller('accounts')
 export class AccountsController {
@@ -23,7 +24,7 @@ export class AccountsController {
 
   @ApiBearerAuth()
   @Put('/settings')
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard(), SignInGuard)
   updateSettings(
     @GetUser() user: User,
     @Body() updateSettingsDto: UpdateSettingsDto,

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-async function main() {
+export async function seedReactionReferences() {
   await prisma.reactionReference.upsert({
     where: { name: 'like' },
     update: {},
@@ -22,13 +22,5 @@ async function main() {
     update: {},
     create: { name: 'sad' },
   });
+  prisma.$disconnect;
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

@@ -24,13 +24,25 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Microblog - Ravn Node.js Challenge
+
+Docs: https://ravn-node-challenge.herokuapp.com/api
+Since Mailgun was used as a service for sending emails, it's recommended you try the api directly on the docs link.
 
 ## Installation
 
 ```bash
 $ npm install
 ```
+
+## Enviroment variables
+| Key | Value Type | Example |
+|-----|------------|---------|
+| PORT|    NUMBER  |  3000   |
+| DATABASE_URL |    STRING  |  postgresql://postgres:postgres@localhost:5432/microblog?schema=public   |
+| MAILGUN_API_KEY |    STRING  |  YOUR_MAILGUN_API_KEY   |
+| MAILGUN_DOMAIN |    STRING  |  YOUR_MAILGUN_DOMAIN   |
+| JWT_SECRET |    STRING  |  YOUR_JWT_SECRET   |
 
 ## Running the app
 
@@ -46,6 +58,7 @@ $ npm run start:prod
 ```
 
 ## Test
+Module and controller files were omitted for testing purposes
 
 ```bash
 # unit tests

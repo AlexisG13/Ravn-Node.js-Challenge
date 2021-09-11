@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Reaction, User } from '@prisma/client';
+import { CommentReaction, User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { CommentsService } from './comments.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -34,7 +34,7 @@ export class CommentsController {
     @Param('commentId') commentId: string,
     @GetUser() user: User,
     @Body() reactCommentDto: ReactCommentDto,
-  ): Promise<Reaction> {
+  ): Promise<CommentReaction> {
     return this.commentsService.reactToComment(
       reactCommentDto,
       user.id,

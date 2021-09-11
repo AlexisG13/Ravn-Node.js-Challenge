@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Post as PostEntity, Reaction, User, Comment } from '@prisma/client';
+import {
+  Post as PostEntity,
+  User,
+  Comment,
+  PostReaction,
+} from '@prisma/client';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { CommentsService } from 'src/comments/comments.service';
 import { PostCommentDto } from 'src/comments/dtos/post-comment.dto';
@@ -93,12 +98,12 @@ export class PostsController {
     @Param('postId') postId: string,
     @Body() reactPostDto: ReactPostDto,
     @GetUser() user: User,
-  ): Promise<Reaction> {
-    return this.reactToPost(postId, reactPostDto, user);
+  ): Promise<PostReaction> {
+    return this.postService.reactToPost(reactPostDto, user.id, postId);
   }
 
   @Get('/:postId/reactions')
-  getPostReactions(@Param('postId') postId: string): Promise<Reaction[]> {
+  getPostReactions(@Param('postId') postId: string): Promise<PostReaction[]> {
     return this.postService.getPostReactions(postId);
   }
 

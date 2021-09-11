@@ -1,30 +1,41 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Reaction, ReactionReference } from '@prisma/client';
-import { ReactableResource } from '../reactions/types/reactable.type';
+import {
+  CommentReaction,
+  PostReaction,
+  ReactionReference,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ReactionsService {
   constructor(private prisma: PrismaService) {}
 
-  async createReaction(
-    resource: ReactableResource,
+  async createCommentReaction(
+    commentId: string,
     userId: string,
     reactionId: string,
-  ): Promise<Reaction> {
+  ): Promise<CommentReaction> {
     const reaction = await this.getReaction(reactionId);
-    return this.prisma.reaction.create({
+    return this.prisma.commentReaction.create({
       data: {
-        reactable: {
-          connect: {
-            resourceId_resourceType: {
-              resourceId: resource.reactable.resourceId,
-              resourceType: resource.reactable.resourceType,
-            },
-          },
-        },
-        User: { connect: { id: userId } },
-        reactionType: { connect: { id: reaction.id } },
+        user: { connect: { id: userId } },
+        comment: { connect: { id: commentId } },
+        reaction: { connect: { id: reaction.id } },
+      },
+    });
+  }
+
+  async createPostReaction(
+    postId: string,
+    userId: string,
+    reactionId: string,
+  ): Promise<PostReaction> {
+    const reaction = await this.getReaction(reactionId);
+    return this.prisma.postReaction.create({
+      data: {
+        user: { connect: { id: userId } },
+        post: { connect: { id: postId } },
+        reaction: { connect: { id: reaction.id } },
       },
     });
   }

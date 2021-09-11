@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostCommentDto } from './dtos/post-comment.dto';
-import { Comment, Reaction } from 'prisma/prisma-client';
+import { Comment, CommentReaction } from 'prisma/prisma-client';
 import { ReactCommentDto } from './dtos/react-comment.dto';
 import { ReactionsService } from '../reactions/reactions.service';
 
@@ -26,24 +26,15 @@ export class CommentsService {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    const newComment = await this.prisma.$transaction(async (prisma) => {
-      const comment = await this.prisma.comment.create({
-        data: {
-          content,
-          author: { connect: { id: userId } },
-          post: { connect: { id: postId } },
-          isLive,
-        },
-      });
-      await prisma.reactable.create({
-        data: {
-          resourceId: comment.id,
-          resourceType: comment.resourceType,
-        },
-      });
-      return comment;
+    const comment = await this.prisma.comment.create({
+      data: {
+        content,
+        author: { connect: { id: userId } },
+        post: { connect: { id: postId } },
+        isLive,
+      },
     });
-    return newComment;
+    return comment;
   }
 
   async getPostComments(postId: string): Promise<Comment[]> {
@@ -96,15 +87,18 @@ export class CommentsService {
     { reactionId }: ReactCommentDto,
     userId: string,
     commentId: string,
-  ): Promise<Reaction> {
+  ): Promise<CommentReaction> {
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },
-      include: { reactable: true },
     });
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
-    return this.reactionService.createReaction(comment, userId, reactionId);
+    return this.reactionService.createCommentReaction(
+      comment.id,
+      userId,
+      reactionId,
+    );
   }
 
   async getUserComments(userId: string): Promise<Comment[]> {

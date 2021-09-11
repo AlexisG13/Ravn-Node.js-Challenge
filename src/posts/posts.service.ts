@@ -1,10 +1,9 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Post, Reaction } from '@prisma/client';
+import { Post, PostReaction } from '@prisma/client';
 import { ReactionsService } from '../reactions/reactions.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dtos/create-post.dto';
@@ -60,23 +59,15 @@ export class PostsService {
     { title, content, isLive: isDraft }: CreatePostDto,
     userId: string,
   ): Promise<Post> {
-    const post = await this.prisma.$transaction(async (prisma) => {
-      const newPost = await prisma.post.create({
-        data: {
-          title,
-          content,
-          isLive: isDraft,
-          author: { connect: { id: userId } },
-        },
-      });
-      await prisma.reactable.create({
-        data: {
-          resourceId: newPost.id,
-          resourceType: newPost.resourceType,
-        },
-      });
-      return newPost;
+    const post = await this.prisma.post.create({
+      data: {
+        title,
+        content,
+        isLive: isDraft,
+        author: { connect: { id: userId } },
+      },
     });
+
     return post;
   }
 
@@ -102,21 +93,20 @@ export class PostsService {
     { reactionId }: ReactPostDto,
     userId: string,
     postId: string,
-  ): Promise<Reaction> {
+  ): Promise<PostReaction> {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
-      include: { reactable: true },
     });
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    return this.reactionService.createReaction(post, userId, reactionId);
+    return this.reactionService.createPostReaction(post.id, userId, reactionId);
   }
 
   async getPostReactions(postId: string) {
     const post = await this.getPost(postId);
-    const reactions = await this.prisma.reaction.findMany({
-      where: { resourceId: post.id },
+    const reactions = await this.prisma.postReaction.findMany({
+      where: { postId: post.id },
     });
     if (reactions.length === 0) {
       throw new NotFoundException('Post has no reactions');

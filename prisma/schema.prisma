@@ -12,16 +12,17 @@ generator client {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  username     String        @unique
-  email        String        @unique
-  name         String
-  profile      Profile?
-  userAuth     UserAuth?
-  userSettings UserSettings?
-  posts        Post[]
-  comments     Comment[]
-  reactions    Reaction[]
+  id              String            @id @default(uuid())
+  username        String            @unique
+  email           String            @unique
+  name            String
+  profile         Profile?
+  userAuth        UserAuth?
+  userSettings    UserSettings?
+  posts           Post[]
+  comments        Comment[]
+  PostReaction    PostReaction[]
+  CommentReaction CommentReaction[]
 }
 
 model UserAuth {
@@ -56,58 +57,55 @@ model Profile {
 }
 
 model Post {
-  id           String     @id @default(uuid())
-  resourceType String     @default("1")
+  id           String         @id @default(uuid())
   title        String
   content      String
   isLive       Boolean
-  author       User       @relation(fields: [authorId], references: [id])
+  author       User           @relation(fields: [authorId], references: [id])
   authorId     String
   comment      Comment[]
-  reactable    Reactable? @relation(fields: [id, resourceType], references: [resourceId, resourceType])
+  PostReaction PostReaction[]
 }
 
 model Comment {
-  id           String     @id @default(uuid())
-  resourceType String     @default("2")
-  content      String
-  isLive       Boolean
-  post         Post       @relation(fields: [postId], references: [id])
-  postId       String
-  author       User       @relation(fields: [authorId], references: [id])
-  authorId     String
-  reactable    Reactable? @relation(fields: [id, resourceType], references: [resourceId, resourceType])
-}
-
-model Reactable {
-  resourceId   String
-  resourceType String
-
-  Comment  Comment[]
-  Post     Post[]
-  Reaction Reaction[]
-  @@id([resourceId, resourceType])
-}
-
-model Reaction {
-  id           String            @id @default(uuid())
-  reactable    Reactable         @relation(fields: [resourceId, resourceType], references: [resourceId, resourceType])
-  resourceId   String
-  reactionType ReactionReference @relation(fields: [resourceType], references: [id])
-  resourceType String
-  User         User              @relation(fields: [userId], references: [id])
-  userId       String
-
-  @@unique([resourceId, userId])
+  id              String            @id @default(uuid())
+  content         String
+  isLive          Boolean
+  post            Post              @relation(fields: [postId], references: [id])
+  postId          String
+  author          User              @relation(fields: [authorId], references: [id])
+  authorId        String
+  CommentReaction CommentReaction[]
 }
 
 model ReactionReference {
-  id       String     @id @default(uuid())
-  name     String     @unique
-  Reaction Reaction[]
+  id              String            @id @default(uuid())
+  name            String            @unique
+  PostReaction    PostReaction[]
+  CommentReaction CommentReaction[]
 }
 
 model JwtBlackList {
   id  String @id @default(uuid())
   jwt String
+}
+
+model PostReaction {
+  id                  String            @id @default(uuid())
+  post                Post              @relation(fields: [postId], references: [id])
+  user                User              @relation(fields: [userId], references: [id])
+  reaction            ReactionReference @relation(fields: [reactionReferenceId], references: [id])
+  postId              String
+  userId              String
+  reactionReferenceId String
+}
+
+model CommentReaction {
+  id                  String            @id @default(uuid())
+  comment             Comment           @relation(fields: [commentId], references: [id])
+  user                User              @relation(fields: [userId], references: [id])
+  reaction            ReactionReference @relation(fields: [reactionReferenceId], references: [id])
+  userId              String
+  reactionReferenceId String
+  commentId           String
 }

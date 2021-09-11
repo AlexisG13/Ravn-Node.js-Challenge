@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ forbidUnknownValues: true }));
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('My U library')
+    .setTitle('Microblog')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
